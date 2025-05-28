@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WinXP Radio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(45deg, #0f4c75, #3282b8, #bbe1fa);
+            font-family: 'Tahoma', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .radio-container {
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 2px outset #c0c0c0;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            width: 520px;
+            height: 280px;
+            position: relative;
+        }
+
+        .radio-header {
+            background: linear-gradient(90deg, #0057b8, #4a90e2);
+            color: white;
+            padding: 8px 15px;
+            margin: -30px -30px 20px -30px;
+            border-radius: 13px 13px 0 0;
+            border-bottom: 2px inset #808080;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .radio-icon {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 2px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #0057b8;
+        }
+
+        .display {
+            background: #001122;
+            color: #00ff00;
+            padding: 15px;
+            border: 2px inset #808080;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            min-height: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .display.boot-sequence {
+            animation: bootUp 2s ease-in-out;
+        }
+
+        @keyframes bootUp {
+            0% { 
+                background: #000000;
+                color: #333333;
+            }
+            30% { 
+                background: #000011;
+                color: #006600;
+            }
+            60% {
+                background: #001111;
+                color: #00aa00;
+            }
+            100% { 
+                background: #001122;
+                color: #00ff00;
+            }
+        }
+
+        .boot-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ff00;
+            opacity: 0;
+            animation: logoFade 2s ease-in-out;
+        }
+
+        @keyframes logoFade {
+            0%, 20% { opacity: 0; }
+            40%, 80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .frequency {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            min-height: 35px;
+            transition: all 0.3s ease;
+        }
+
+        .frequency.changing {
+            animation: frequencyRoll 0.6s ease-in-out;
+        }
+
+        @keyframes frequencyRoll {
+            0% { transform: rotateX(0deg); opacity: 1; }
+            50% { transform: rotateX(90deg); opacity: 0.3; }
+            100% { transform: rotateX(0deg); opacity: 1; }
+        }
+
+        .station-info {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .now-playing {
+            font-size: 11px;
+            margin-top: 8px;
+            color: #00cccc;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .station-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .station-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .led-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+            border: 1px inset #666;
+            transition: all 0.3s ease;
+        }
+
+        .led-indicator.active {
+            background: radial-gradient(circle, #00ff00, #00aa00);
+            box-shadow: 0 0 8px #00ff00;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 2px outset #c0c0c0;
+            border-radius: 3px;
+            padding: 8px 12px;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 35px;
+            transform: scale(1);
+        }
+
+        .btn:hover {
+            background: linear-gradient(145deg, #e8e8e8, #c8c8c8);
+            transform: scale(1.05);
+        }
+
+        .btn:active, .btn.active {
+            border: 2px inset #c0c0c0;
+            background: linear-gradient(145deg, #d0d0d0, #f0f0f0);
+            transform: scale(0.95);
+        }
+
+        .btn.pressed {
+            animation: buttonPress 0.2s ease;
+        }
+
+        @keyframes buttonPress {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); background: linear-gradient(145deg, #d0d0d0, #f0f0f0); }
+            100% { transform: scale(1); }
+        }
+
+        .power-btn {
+            background: linear-gradient(145deg, #ff4444, #cc0000);
+            color: white;
+            border: 2px outset #ff6666;
+            padding: 10px 15px;
+            font-size: 12px;
+        }
+
+        .power-btn:hover {
+            background: linear-gradient(145deg, #ff6666, #dd0000);
+        }
+
+        .power-btn.off {
+            background: linear-gradient(145deg, #666666, #333333);
+            border: 2px outset #888888;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 200px;
+            height: 20px;
+            border: 2px inset #808080;
+            background: #f0f0f0;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 16px;
+            background: linear-gradient(145deg, #f0f0f0, #d0d0d0);
+            border: 1px outset #c0c0c0;
+            cursor: pointer;
+        }
+
+        .volume-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            min-width: 60px;
+        }
+
+        .antenna {
+            position: absolute;
+            top: -40px;
+            right: 50px;
+            width: 4px;
+            height: 60px;
+            background: linear-gradient(to top, #999, #ccc);
+            border-radius: 2px;
+            transform: rotate(-15deg);
+        }
+
+        .antenna::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -2px;
+            width: 8px;
+            height: 8px;
+            background: #ff0000;
+            border-radius: 50%;
+        }
+
+        .speaker-grille {
+            position: absolute;
+            right: 20px;
+            top: 80px;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
+            border: 2px inset #808080;
+            border-radius: 5px;
+        }
+
+        .speaker-holes {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2px;
+            padding: 6px;
+            height: 100%;
+        }
+
+        .speaker-hole {
+            background: radial-gradient(circle, #666 30%, #333 70%);
+            border-radius: 50%;
+            aspect-ratio: 1;
+            border: 1px inset #999;
+        }
+
+        @keyframes signal {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .signal-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 20px;
+            height: 15px;
+        }
+
+        .signal-bar {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            background: #00ff00;
+            animation: signal 2s infinite;
+        }
+
+        .signal-bar:nth-child(1) { left: 0; height: 40%; animation-delay: 0s; }
+        .signal-bar:nth-child(2) { left: 4px; height: 60%; animation-delay: 0.2s; }
+        .signal-bar:nth-child(3) { left: 8px; height: 80%; animation-delay: 0.4s; }
+        .signal-bar:nth-child(4) { left: 12px; height: 100%; animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="radio-container">
+        <div class="antenna"></div>
+        <div class="radio-header">
+            <div class="radio-icon">📻</div>
+            XP Radio Player v1.0
+        </div>
+        
+        <div class="display">
+            <div class="frequency" id="frequency">OFF</div>
+            <div class="station-info" id="stationInfo">Press POWER to start</div>
+            <div class="now-playing" id="nowPlaying"></div>
+            <div class="signal-indicator" id="signalIndicator" style="display: none;">
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="station-buttons">
+                <div class="station-group">
+                    <div class="led-indicator" id="led1"></div>
+                    <button class="btn" id="btn1" onclick="tuneStation(1)" disabled>1</button>
+                </div>
+                <div class="station-group">
+                    <div class="led-indicator" id="led2"></div>
+                    <button class="btn" id="btn2" onclick="tuneStation(2)" disabled>2</button>
+                </div>
+                <div class="station-group">
+                    <div class="led-indicator" id="led3"></div>
+                    <button class="btn" id="btn3" onclick="tuneStation(3)" disabled>3</button>
+                </div>
+                <div class="station-group">
+                    <div class="led-indicator" id="led4"></div>
+                    <button class="btn" id="btn4" onclick="tuneStation(4)" disabled>4</button>
+                </div>
+                <div class="station-group">
+                    <div class="led-indicator" id="led5"></div>
+                    <button class="btn" id="btn5" onclick="tuneStation(5)" disabled>5</button>
+                </div>
+            </div>
+            <button class="power-btn off" id="powerBtn" onclick="togglePower()">POWER</button>
+        </div>
+
+        <div class="volume-control">
+            <span class="volume-label">Volume:</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50" oninput="adjustVolume()" disabled>
+            <span class="volume-label" id="volumeDisplay">50%</span>
+        </div>
+
+        <div class="speaker-grille">
+        </div>
+    </div>
+
+    <script>
+        class RadioStation {
+            constructor(frequency, name, genre, songs) {
+                this.frequency = frequency;
+                this.name = name;
+                this.genre = genre;
+                this.songs = songs;
+                this.currentSongIndex = 0;
+                this.audio = null;
+                this.startTime = Date.now();
+                this.lastPausedTime = 0;
+                this.isPlaying = false;
+            }
+
+            createAudio() {
+                if (this.audio) return;
+                
+                this.audio = new Audio();
+                this.audio.loop = false;
+                this.audio.preload = 'auto';
+                
+                // Start at a random time to simulate radio experience
+                const randomStart = Math.random() * 0.3; // Start 0-30% into the song
+                
+                this.audio.addEventListener('loadedmetadata', () => {
+                    if (this.audio.duration) {
+                        this.audio.currentTime = this.audio.duration * randomStart;
+                    }
+                });
+
+                this.audio.addEventListener('ended', () => {
+                    this.nextSong();
+                });
+
+                this.loadCurrentSong();
+            }
+
+            loadCurrentSong() {
+                if (!this.audio) return;
+                
+                const song = this.songs[this.currentSongIndex];
+                this.audio.src = song.url;
+                this.audio.load();
+            }
+
+            play() {
+                if (!this.audio) this.createAudio();
+                this.isPlaying = true;
+                this.audio.play().catch(e => console.log('Audio play failed:', e));
+            }
+
+            pause() {
+                if (this.audio) {
+                    this.audio.pause();
+                    this.isPlaying = false;
+                }
+            }
+
+            // Mute/unmute instead of pause/play for background stations
+            mute() {
+                if (this.audio) {
+                    this.audio.volume = 0;
+                }
+            }
+
+            unmute(volume) {
+                if (this.audio) {
+                    this.audio.volume = volume / 100;
+                }
+            }
+
+            nextSong() {
+                this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
+                this.loadCurrentSong();
+                // Keep playing if this station was playing
+                if (this.isPlaying) {
+                    this.play();
+                }
+            }
+
+            getCurrentSong() {
+                return this.songs[this.currentSongIndex];
+            }
+
+            setVolume(volume) {
+                if (this.audio) {
+                    this.audio.volume = volume / 100;
+                }
+            }
+
+            // Start background playback (muted)
+            startBackground() {
+                if (!this.audio) this.createAudio();
+                this.isPlaying = true;
+                this.audio.volume = 0; // Start muted
+                this.audio.play().catch(e => console.log('Background audio play failed:', e));
+            }
+        }
+
+        class Radio {
+            constructor() {
+                this.isPowered = false;
+                this.currentStation = null;
+                this.volume = 50;
+                this.stations = this.createStations();
+                this.updateInterval = null;
+                this.allStationsStarted = false;
+            }
+
+            createStations() {
+                return [
+                    new RadioStation('89.5 FM', 'CHILL VIBES', 'Ambient', [
+                        { title: 'Weightless', artist: 'Marconi Union', url: './audio/chill1.mp3' },
+                        { title: 'Aqueous Transmission', artist: 'Incubus', url: './audio/chill2.mp3' },
+                        { title: 'Porcelain', artist: 'Moby', url: './audio/chill3.mp3' }
+                    ]),
+                    new RadioStation('95.7 FM', 'ROCK CITY', 'Rock', [
+                        { title: 'Thunderstruck', artist: 'AC/DC', url: './audio/rock1.mp3' },
+                        { title: 'Enter Sandman', artist: 'Metallica', url: './audio/rock2.mp3' },
+                        { title: 'Sweet Child O Mine', artist: 'Guns N Roses', url: './audio/rock3.mp3' }
+                    ]),
+                    new RadioStation('101.3 FM', 'BEAT STREET', 'Hip-Hop', [
+                        { title: 'Lose Yourself', artist: 'Eminem', url: './audio/hiphop1.mp3' },
+                        { title: 'HUMBLE.', artist: 'Kendrick Lamar', url: './audio/hiphop2.mp3' },
+                        { title: 'Sicko Mode', artist: 'Travis Scott', url: './audio/hiphop3.mp3' }
+                    ]),
+                    new RadioStation('103.9 FM', 'JAZZ LOUNGE', 'Jazz', [
+                        { title: 'Take Five', artist: 'Dave Brubeck', url: './audio/jazz1.mp3' },
+                        { title: 'So What', artist: 'Miles Davis', url: './audio/jazz2.mp3' },
+                        { title: 'Autumn Leaves', artist: 'Bill Evans', url: './audio/jazz3.mp3' }
+                    ]),
+                    new RadioStation('107.1 FM', 'ELECTRO PULSE', 'Electronic', [
+                        { title: 'Strobe', artist: 'Deadmau5', url: './audio/electronic1.mp3' },
+                        { title: 'Levels', artist: 'Avicii', url: './audio/electronic2.mp3' },
+                        { title: 'Clarity', artist: 'Zedd', url: './audio/electronic3.mp3' }
+                    ])
+                ];
+            }
+
+            // Start all stations playing in background
+            startAllStations() {
+                if (this.allStationsStarted) return;
+                
+                this.stations.forEach(station => {
+                    station.startBackground();
+                });
+                this.allStationsStarted = true;
+            }
+
+            power(on) {
+                this.isPowered = on;
+                const powerBtn = document.getElementById('powerBtn');
+                const buttons = document.querySelectorAll('.btn');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const signalIndicator = document.getElementById('signalIndicator');
+                const display = document.querySelector('.display');
+
+                if (on) {
+                    // Start all stations in background
+                    this.startAllStations();
+                    
+                    // Boot sequence
+                    display.classList.add('boot-sequence');
+                    display.innerHTML = '<div class="boot-logo">TRENCHERS RADIO<br>v1.0</div>';
+                    
+                    setTimeout(() => {
+                        display.classList.remove('boot-sequence');
+                        display.innerHTML = `
+                            <div class="frequency" id="frequency">OFF</div>
+                            <div class="station-info" id="stationInfo">Press POWER to start</div>
+                            <div class="now-playing" id="nowPlaying"></div>
+                            <div class="signal-indicator" id="signalIndicator" style="display: none;">
+                                <div class="signal-bar"></div>
+                                <div class="signal-bar"></div>
+                                <div class="signal-bar"></div>
+                                <div class="signal-bar"></div>
+                            </div>
+                        `;
+                        
+                        powerBtn.classList.remove('off');
+                        powerBtn.textContent = 'ON';
+                        buttons.forEach(btn => btn.disabled = false);
+                        volumeSlider.disabled = false;
+                        document.getElementById('signalIndicator').style.display = 'block';
+                        
+                        // Start with station 1
+                        this.tuneToStation(0);
+                        this.startUpdates();
+                    }, 2000);
+                    
+                } else {
+                    powerBtn.classList.add('off');
+                    powerBtn.textContent = 'POWER';
+                    buttons.forEach(btn => {
+                        btn.disabled = true;
+                        btn.classList.remove('active');
+                    });
+                    volumeSlider.disabled = true;
+                    
+                    // Turn off all LEDs
+                    document.querySelectorAll('.led-indicator').forEach(led => {
+                        led.classList.remove('active');
+                    });
+                    
+                    // Mute all stations but keep them playing
+                    this.stations.forEach(station => {
+                        station.mute();
+                    });
+                    
+                    this.currentStation = null;
+                    this.updateDisplay('OFF', 'Press POWER to start', '');
+                    this.stopUpdates();
+                }
+            }
+
+            tuneToStation(index) {
+                if (!this.isPowered) return;
+
+                // Mute current station but keep it playing
+                if (this.currentStation) {
+                    this.currentStation.mute();
+                }
+
+                // Visual feedback - button press animation
+                const button = document.getElementById(`btn${index + 1}`);
+                button.classList.add('pressed');
+                setTimeout(() => button.classList.remove('pressed'), 200);
+
+                // Update button states and LEDs
+                document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.led-indicator').forEach(led => led.classList.remove('active'));
+                
+                button.classList.add('active');
+                document.getElementById(`led${index + 1}`).classList.add('active');
+
+                // Frequency scanning animation
+                this.animateFrequencyChange(index);
+
+                // Set new station and unmute it
+                this.currentStation = this.stations[index];
+                this.currentStation.unmute(this.volume);
+
+                setTimeout(() => {
+                    this.updateStationDisplay();
+                }, 1100);
+            }
+
+            animateFrequencyChange(targetIndex) {
+                const frequencyEl = document.getElementById('frequency');
+                const targetFreq = this.stations[targetIndex].frequency;
+                const currentFreq = this.currentStation ? this.currentStation.frequency : '88.0 FM';
+                
+                // Extract numbers from frequency strings
+                const currentNum = parseFloat(currentFreq.replace(' FM', ''));
+                const targetNum = parseFloat(targetFreq.replace(' FM', ''));
+                
+                const totalSteps = Math.abs(targetNum - currentNum) * 10; // Number of 0.1 increments
+                const stepDuration = 1000 / totalSteps; // Divide 1 second by total steps
+                
+                let step = currentNum < targetNum ? 0.1 : -0.1;
+                let current = currentNum;
+                
+                const scanInterval = setInterval(() => {
+                    if ((step > 0 && current >= targetNum) || (step < 0 && current <= targetNum)) {
+                        clearInterval(scanInterval);
+                        frequencyEl.textContent = targetFreq;
+                        return;
+                    }
+                    
+                    current += step;
+                    current = Math.round(current * 10) / 10; // Round to 1 decimal place
+                    frequencyEl.textContent = current.toFixed(1) + ' FM';
+                }, stepDuration);
+            }
+
+            updateStationDisplay() {
+                if (!this.currentStation) return;
+
+                const song = this.currentStation.getCurrentSong();
+                this.updateDisplay(
+                    this.currentStation.frequency,
+                    `${this.currentStation.name} - ${this.currentStation.genre}`,
+                    `♪ ${song.artist} - ${song.title}`
+                );
+            }
+
+            updateDisplay(frequency, stationInfo, nowPlaying) {
+                document.getElementById('frequency').textContent = frequency;
+                document.getElementById('stationInfo').textContent = stationInfo;
+                document.getElementById('nowPlaying').textContent = nowPlaying;
+            }
+
+            setVolume(volume) {
+                this.volume = volume;
+                if (this.currentStation) {
+                    this.currentStation.setVolume(volume);
+                }
+                document.getElementById('volumeDisplay').textContent = `${volume}%`;
+            }
+
+            startUpdates() {
+                this.updateInterval = setInterval(() => {
+                    if (this.currentStation && this.isPowered) {
+                        this.updateStationDisplay();
+                    }
+                }, 1000);
+            }
+
+            stopUpdates() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                    this.updateInterval = null;
+                }
+            }
+        }
+
+        // Initialize radio
+        const radio = new Radio();
+
+        // Global functions for HTML event handlers
+        function togglePower() {
+            radio.power(!radio.isPowered);
+        }
+
+        function tuneStation(stationNumber) {
+            radio.tuneToStation(stationNumber - 1);
+        }
+
+        function adjustVolume() {
+            const volume = document.getElementById('volumeSlider').value;
+            radio.setVolume(parseInt(volume));
+        }
+
+        // Handle page visibility change to keep stations running
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && radio.isPowered && radio.currentStation) {
+                // Resume current station if needed
+                radio.currentStation.play();
+            }
+        });
+
+        // Handle user interaction to start audio (required by browsers)
+        document.addEventListener('click', () => {
+            if (!radio.allStationsStarted) {
+                radio.startAllStations();
+            }
+        });
+    </script>
+</body>
+</html>
