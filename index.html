@@ -425,11 +425,12 @@
 
     <script>
         class RadioStation {
-            constructor(frequency, name, genre, songs) {
+            constructor(frequency, name, genre, songs, stationIndex) {
                 this.frequency = frequency;
                 this.name = name;
                 this.genre = genre;
                 this.songs = songs;
+                this.stationIndex = stationIndex; // Added station index
                 this.currentSongIndex = 0;
                 this.audio = null;
                 this.startTime = Date.now();
@@ -445,18 +446,24 @@
                 this.audio.preload = 'auto';
                 
                 this.audio.addEventListener('loadedmetadata', () => {
-                    // Set specific start times based on the song index
+                    // Set specific start times based on the station index
                     if (this.audio.duration) {
                         let startTime = 0;
-                        if (this.currentSongIndex === 0) {
-                            startTime = 0; // First song starts at 0 seconds
-                        } else if (this.currentSongIndex === 1) {
-                            startTime = 120; // Second song starts at 2 minutes (120 seconds)
+                        
+                        // Station 2 (index 1) starts at 2 minutes for all songs
+                        if (this.stationIndex === 1) {
+                            startTime = 120; // 2 minutes (120 seconds)
+                        } else if (this.currentSongIndex === 0) {
+                            startTime = 0; // First song of other stations starts at 0 seconds
                         } else {
-                            // For the rest, a random time between 10 and 40 seconds
+                            // For other songs, random time between 10 and 40 seconds
                             startTime = Math.floor(Math.random() * (40 - 10 + 1)) + 10;
                         }
-                        this.audio.currentTime = startTime;
+                        
+                        // Make sure we don't go beyond the song duration
+                        if (startTime < this.audio.duration) {
+                            this.audio.currentTime = startTime;
+                        }
                     }
                 });
 
@@ -542,27 +549,27 @@
                         { title: 'Somebody That I Used To Know', artist: 'Gyote', url: './audio/chill1.mp3' },
                         { title: 'Riptide', artist: 'Vance Joy', url: './audio/chill2.mp3' },
                         { title: 'Porcelain', artist: 'Moby', url: './audio/chill3.mp3' }
-                    ]),
+                    ], 0),
                     new RadioStation('95.7 FM', 'RAP HOUSE', 'Rap', [
                         { title: 'My Eyes', artist: 'Travis Scott', url: './audio/rock1.mp3' },
                         { title: 'Money Trees', artist: 'Kendrick Lamar', url: './audio/rock2.mp3' },
                         { title: 'Sweet Child O Mine', artist: 'Guns N Roses', url: './audio/rock3.mp3' }
-                    ]),
+                    ], 1), // Station 2 - this will start songs at 2 minutes
                     new RadioStation('101.3 FM', 'BEAT STREET', 'Hip-Hop', [
                         { title: 'All Eyez On Me', artist: '2Pac', url: './audio/hiphop1.mp3' },
                         { title: 'Juicy', artist: 'Notorius B.I.G', url: './audio/hiphop2.mp3' },
                         { title: 'Sicko Mode', artist: 'Travis Scott', url: './audio/hiphop3.mp3' }
-                    ]),
+                    ], 2),
                     new RadioStation('103.9 FM', 'JAZZ LOUNGE', 'Jazz', [
                         { title: 'Take Five', artist: 'Dave Brubeck', url: './audio/jazz1.mp3' },
                         { title: 'So What', artist: 'Miles Davis', url: './audio/jazz2.mp3' },
                         { title: 'Autumn Leaves', artist: 'Bill Evans', url: './audio/jazz3.mp3' }
-                    ]),
+                    ], 3),
                     new RadioStation('107.1 FM', 'ELECTRO PULSE', 'Electronic', [
                         { title: 'Dont Start Now', artist: 'Dua Lipa', url: './audio/electronic1.mp3' },
                         { title: 'Levels', artist: 'Avicii', url: './audio/electronic2.mp3' },
                         { title: 'Clarity', artist: 'Zedd', url: './audio/electronic3.mp3' }
-                    ])
+                    ], 4)
                 ];
             }
 
