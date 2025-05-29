@@ -371,13 +371,13 @@
             Trenchers Radio
         </div>
         <div class="screen-links">
-            <a href="https://pump.fun" target="_blank" rel="noopener noreferrer">pump.fun</a>
-            <a href="https://x.com" target="_blank" rel="noopener noreferrer">x.com</a>
-        </div>
-                
+        <a href="https://pump.fun" target="_blank" rel="noopener noreferrer">pump.fun</a>
+        <a href="https://x.com" target="_blank" rel="noopener noreferrer">x.com</a>
+    </div>
+            
         <div class="display">
             <div class="frequency" id="frequency">OFF</div>
-            <div class="station-info" id="stationInfo">Press POWER to start</div>
+            <div class="station-info" id="stationInfo">POWER to start</div>
             <div class="now-playing" id="nowPlaying"></div>
             <div class="signal-indicator" id="signalIndicator" style="display: none;">
                 <div class="signal-bar"></div>
@@ -444,12 +444,19 @@
                 this.audio.loop = false;
                 this.audio.preload = 'auto';
                 
-                // Start at a random time to simulate radio experience
-                const randomStart = Math.random() * 0.3; // Start 0-30% into the song
-                
                 this.audio.addEventListener('loadedmetadata', () => {
+                    // Set specific start times based on the song index
                     if (this.audio.duration) {
-                        this.audio.currentTime = this.audio.duration * randomStart;
+                        let startTime = 0;
+                        if (this.currentSongIndex === 0) {
+                            startTime = 0; // First song starts at 0 seconds
+                        } else if (this.currentSongIndex === 1) {
+                            startTime = 120; // Second song starts at 2 minutes (120 seconds)
+                        } else {
+                            // For the rest, a random time between 10 and 40 seconds
+                            startTime = Math.floor(Math.random() * (40 - 10 + 1)) + 10;
+                        }
+                        this.audio.currentTime = startTime;
                     }
                 });
 
@@ -481,7 +488,6 @@
                 }
             }
 
-            // Mute/unmute instead of pause/play for background stations
             mute() {
                 if (this.audio) {
                     this.audio.volume = 0;
@@ -497,7 +503,6 @@
             nextSong() {
                 this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
                 this.loadCurrentSong();
-                // Keep playing if this station was playing
                 if (this.isPlaying) {
                     this.play();
                 }
@@ -513,11 +518,10 @@
                 }
             }
 
-            // Start background playback (muted)
             startBackground() {
                 if (!this.audio) this.createAudio();
                 this.isPlaying = true;
-                this.audio.volume = 0; // Start muted
+                this.audio.volume = 0;
                 this.audio.play().catch(e => console.log('Background audio play failed:', e));
             }
         }
